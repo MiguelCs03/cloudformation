@@ -29,7 +29,7 @@ Resources:
   RedStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: ./red.yaml
+      TemplateURL: https://cf-templates-1c46xw9eudc8p-us-east-1.s3.us-east-1.amazonaws.com/red.yaml
       Parameters:
         Proyecto: !Ref Proyecto
         Ambiente: !Ref Ambiente
@@ -38,7 +38,7 @@ Resources:
   SeguridadStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: ./seguridad.yaml
+      TemplateURL: https://cf-templates-1c46xw9eudc8p-us-east-1.s3.us-east-1.amazonaws.com/seguridad.yaml
       Parameters:
         Proyecto: !Ref Proyecto
         Ambiente: !Ref Ambiente
@@ -48,7 +48,7 @@ Resources:
     Type: AWS::CloudFormation::Stack
     DependsOn: SeguridadStack
     Properties:
-      TemplateURL: ./servidores.yaml
+      TemplateURL: https://cf-templates-1c46xw9eudc8p-us-east-1.s3.us-east-1.amazonaws.com/servidores.yaml
       Parameters:
         Proyecto: !Ref Proyecto
         Ambiente: !Ref Ambiente
