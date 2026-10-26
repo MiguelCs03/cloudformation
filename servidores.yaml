@@ -40,6 +40,8 @@ Resources:
           Value: !Ref Ambiente
         - Key: Capa
           Value: Frontend
+        - Key: Version
+          Value: v1.1
 
   # Servidor 2: Backend
   InstanciaBackend:
@@ -89,3 +91,6 @@ Outputs:
   IpPublicaBaseDatos:
     Description: IP publica del servidor Base de Datos
     Value: !GetAtt InstanciaBaseDatos.PublicIp
+
+  IdInstanciaFrontend:
+    Value: !Ref InstanciaFrontend
