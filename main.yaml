@@ -1,0 +1,72 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Stack Padre - Orquestador de Plantillas Anidadas"
+
+Parameters:
+  Proyecto:
+    Type: String
+    Default: globomatics
+    Description: Nombre del proyecto base
+
+  Ambiente:
+    Type: String
+    Default: dev
+    AllowedValues: [dev, qa, prod]
+    Description: Entorno de despliegue (dev, qa, prod)
+
+  TipoInstancia:
+    Type: String
+    Default: t3.micro
+    AllowedValues: [t3.micro, t3.small]
+    Description: Tipo de instancia EC2 para computo
+
+  ImagenLinux:
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+    Default: /aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64
+    Description: Parametro SSM que resuelve la ultima AMI oficial de Amazon Linux 2023
+
+Resources:
+  # =======================================================
+  # STACK ANIDADO 1: RED
+  # =======================================================
+  RedStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: ./red.yaml
+      Parameters:
+        Proyecto: !Ref Proyecto
+        Ambiente: !Ref Ambiente
+
+  # =======================================================
+  # STACK ANIDADO 2: SEGURIDAD
+  # =======================================================
+  SeguridadStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: ./seguridad.yaml
+      Parameters:
+        Proyecto: !Ref Proyecto
+        Ambiente: !Ref Ambiente
+
+  # =======================================================
+  # STACK ANIDADO 3: COMPUTO / SERVIDORES
+  # =======================================================
+  ServidoresStack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: SeguridadStack
+    Properties:
+      TemplateURL: ./servidores.yaml
+      Parameters:
+        Proyecto: !Ref Proyecto
+        Ambiente: !Ref Ambiente
+        TipoInstancia: !Ref TipoInstancia
+        ImagenLinux: !Ref ImagenLinux
+        SecurityGroupId: !GetAtt SeguridadStack.Outputs.SecurityGroupId
+
+Outputs:
+  IpPublicaFrontend:
+    Description: IP publica del Frontend invocada desde ServidoresStack
+    Value: !GetAtt ServidoresStack.Outputs.IpPublicaFrontend
+
+  IpPublicaBackend:
+    Description: IP publica del Backend invocada desde ServidoresStack
+    Value: !GetAtt ServidoresStack.Outputs.IpPublicaBackend

@@ -1,0 +1,95 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Plantilla Hija - Base de Red (VPC, Subred e Internet Gateway)"
+
+Parameters:
+  Proyecto:
+    Type: String
+    Default: globomatics
+    Description: Nombre del proyecto base
+
+  Ambiente:
+    Type: String
+    Default: dev
+    AllowedValues: [dev, qa, prod]
+    Description: Entorno de despliegue (dev, qa, prod)
+
+Resources:
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+        - Key: Name
+          Value: !Sub "vpc-${Proyecto}-${Ambiente}"
+        - Key: Proyecto
+          Value: !Ref Proyecto
+        - Key: Ambiente
+          Value: !Ref Ambiente
+
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub "igw-${Proyecto}-${Ambiente}"
+        - Key: Proyecto
+          Value: !Ref Proyecto
+        - Key: Ambiente
+          Value: !Ref Ambiente
+
+  AttachGateway:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref VPC
+      InternetGatewayId: !Ref InternetGateway
+
+  SubredPublica:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.1.0/24
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Sub "subnet-${Proyecto}-${Ambiente}-publica"
+        - Key: Proyecto
+          Value: !Ref Proyecto
+        - Key: Ambiente
+          Value: !Ref Ambiente
+
+  RouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub "rt-${Proyecto}-${Ambiente}-publica"
+        - Key: Proyecto
+          Value: !Ref Proyecto
+        - Key: Ambiente
+          Value: !Ref Ambiente
+
+  DefaultRoute:
+    Type: AWS::EC2::Route
+    DependsOn: AttachGateway
+    Properties:
+      RouteTableId: !Ref RouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+  SubnetRouteTableAssoc:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref SubredPublica
+      RouteTableId: !Ref RouteTable
+
+Outputs:
+  VpcId:
+    Description: ID de la VPC generada
+    Value: !Ref VPC
+
+  SubnetId:
+    Description: ID de la subred publica generada
+    Value: !Ref SubredPublica

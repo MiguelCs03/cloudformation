@@ -1,0 +1,122 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Plantilla de CloudFormation para migracion de infraestructura de 2 capas (Frontend y Backend) con Security Group"
+
+Parameters:
+  Proyecto:
+    Type: String
+    Default: asistencia
+    Description: Nombre del proyecto base
+
+  Ambiente:
+    Type: String
+    Default: dev
+    AllowedValues: [dev, qa, prod]
+    Description: Entorno de despliegue (dev, qa, prod)
+
+  TipoInstancia:
+    Type: String
+    Default: t3.micro
+    AllowedValues: [t3.micro, t3.small]
+    Description: Tipo de instancia EC2 para computo
+
+  ImagenLinux:
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+    Default: /aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64
+    Description: Parametro dinamico SSM que resuelve la ultima AMI oficial de Amazon Linux 2023
+
+Resources:
+  # Security Group
+  GrupoSeguridadApp:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: !Sub "Security Group para Frontend y Backend de ${Proyecto}-${Ambiente}"
+      SecurityGroupIngress:
+        # HTTP 
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+          Description: "Trafico web HTTP"
+        # HTTPS 
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+          Description: "Trafico web HTTPS"
+        # SSH 
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+          Description: "Acceso administrativo SSH"
+        # Puerto para comunicacion de la aplicacion / API
+        - IpProtocol: tcp
+          FromPort: 3000
+          ToPort: 3000
+          CidrIp: 0.0.0.0/0
+          Description: "Puerto de aplicacion Backend"
+      Tags:
+        - Key: Name
+          Value: !Sub "sg-${Proyecto}-${Ambiente}"
+        - Key: Proyecto
+          Value: !Ref Proyecto
+        - Key: Ambiente
+          Value: !Ref Ambiente
+  # SERVIDOR FRONTEND 
+  InstanciaFrontend:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !Ref ImagenLinux
+      InstanceType: !Ref TipoInstancia
+      SecurityGroupIds:
+        - !GetAtt GrupoSeguridadApp.GroupId
+      Tags:
+        - Key: Name
+          Value: !Sub "vm-${Proyecto}-${Ambiente}-frontend2"
+        - Key: Proyecto
+          Value: !Ref Proyecto
+        - Key: Ambiente
+          Value: !Ref Ambiente
+        - Key: Capa
+          Value: Frontend
+
+
+  # SERVIDOR BACKEND 
+
+  InstanciaBackend:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !Ref ImagenLinux
+      InstanceType: !Ref TipoInstancia
+      SecurityGroupIds:
+        - !GetAtt GrupoSeguridadApp.GroupId
+      Tags:
+        - Key: Name
+          Value: !Sub "vm-${Proyecto}-${Ambiente}-backend2"
+        - Key: Proyecto
+          Value: !Ref Proyecto
+        - Key: Ambiente
+          Value: !Ref Ambiente
+        - Key: Capa
+          Value: Backend
+
+Outputs:
+  IdGrupoSeguridad:
+    Description: ID del Grupo de Seguridad asignado
+    Value: !GetAtt GrupoSeguridadApp.GroupId
+
+  IdInstanciaFrontend:
+    Description: ID de la instancia de Frontend
+    Value: !Ref InstanciaFrontend
+
+  IpPublicaFrontend:
+    Description: IP publica de la instancia Frontend
+    Value: !GetAtt InstanciaFrontend.PublicIp
+
+  IdInstanciaBackend:
+    Description: ID de la instancia de Backend
+    Value: !Ref InstanciaBackend
+
+  IpPrivadaBackend:
+    Description: IP privada de la instancia Backend
+    Value: !GetAtt InstanciaBackend.PrivateIp

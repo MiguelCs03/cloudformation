@@ -1,0 +1,67 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Plantilla Hija - Servidores de Computo (Frontend y Backend)"
+
+Parameters:
+  Proyecto:
+    Type: String
+    Description: Nombre del proyecto base
+
+  Ambiente:
+    Type: String
+    Description: Entorno de despliegue (dev, qa, prod)
+
+  TipoInstancia:
+    Type: String
+    Description: Tipo de instancia EC2 para computo
+
+  ImagenLinux:
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+    Description: Resolucion dinamica de la AMI oficial mediante SSM Parameter Store
+
+  SecurityGroupId:
+    Type: AWS::EC2::SecurityGroup::Id
+    Description: ID del Grupo de Seguridad inyectado desde el modulo de seguridad
+
+Resources:
+  InstanciaFrontend:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !Ref ImagenLinux
+      InstanceType: !Ref TipoInstancia
+      SecurityGroupIds:
+        - !Ref SecurityGroupId
+      Tags:
+        - Key: Name
+          Value: !Sub "vm-${Proyecto}-${Ambiente}-frontend"
+        - Key: Proyecto
+          Value: !Ref Proyecto
+        - Key: Ambiente
+          Value: !Ref Ambiente
+        - Key: Capa
+          Value: Frontend
+
+  InstanciaBackend:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !Ref ImagenLinux
+      InstanceType: !Ref TipoInstancia
+      SecurityGroupIds:
+        - !Ref SecurityGroupId
+      Tags:
+        - Key: Name
+          Value: !Sub "vm-${Proyecto}-${Ambiente}-backend"
+        - Key: Proyecto
+          Value: !Ref Proyecto
+        - Key: Ambiente
+          Value: !Ref Ambiente
+        - Key: Capa
+          Value: Backend
+
+Outputs:
+  IpPublicaFrontend:
+    Description: IP publica de la instancia Frontend
+    Value: !GetAtt InstanciaFrontend.PublicIp
+
+  IpPublicaBackend:
+    Description: IP publica de la instancia Backend
+    Value: !GetAtt InstanciaBackend.PublicIp
