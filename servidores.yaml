@@ -15,8 +15,8 @@ Parameters:
     Description: Tipo de instancia EC2 para computo
 
   ImagenLinux:
-    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
-    Description: Parametro SSM para resolver la AMI de Amazon Linux 2023
+    Type: String
+    Description: ID de la AMI recibido desde el stack padre
 
   SecurityGroupId:
     Type: AWS::EC2::SecurityGroup::Id
