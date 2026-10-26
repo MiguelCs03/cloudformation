@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: "Plantilla Hija - Base de Red (VPC, Subred e Internet Gateway)"
+Description: "Plantilla Hija - Base de Red"
 
 Parameters:
   Proyecto:
@@ -11,7 +11,7 @@ Parameters:
     Type: String
     Default: dev
     AllowedValues: [dev, qa, prod]
-    Description: Entorno de despliegue (dev, qa, prod)
+    Description: Entorno de despliegue
 
 Resources:
   VPC:
@@ -87,9 +87,9 @@ Resources:
 
 Outputs:
   VpcId:
-    Description: ID de la VPC generada
+    Description: ID de la VPC creada
     Value: !Ref VPC
 
   SubnetId:
-    Description: ID de la subred publica generada
+    Description: ID de la subred publica creada
     Value: !Ref SubredPublica

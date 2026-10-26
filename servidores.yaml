@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: "Plantilla Hija - Servidores de Computo (Frontend y Backend)"
+Description: "Plantilla Hija - Servidores de Computo"
 
 Parameters:
   Proyecto:
@@ -8,7 +8,7 @@ Parameters:
 
   Ambiente:
     Type: String
-    Description: Entorno de despliegue (dev, qa, prod)
+    Description: Entorno de despliegue
 
   TipoInstancia:
     Type: String
@@ -16,13 +16,14 @@ Parameters:
 
   ImagenLinux:
     Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
-    Description: Resolucion dinamica de la AMI oficial mediante SSM Parameter Store
+    Description: Parametro SSM para resolver la AMI de Amazon Linux 2023
 
   SecurityGroupId:
     Type: AWS::EC2::SecurityGroup::Id
-    Description: ID del Grupo de Seguridad inyectado desde el modulo de seguridad
+    Description: ID del Grupo de Seguridad inyectado
 
 Resources:
+  # Servidor 1: Frontend
   InstanciaFrontend:
     Type: AWS::EC2::Instance
     Properties:
@@ -40,6 +41,7 @@ Resources:
         - Key: Capa
           Value: Frontend
 
+  # Servidor 2: Backend
   InstanciaBackend:
     Type: AWS::EC2::Instance
     Properties:
@@ -57,11 +59,33 @@ Resources:
         - Key: Capa
           Value: Backend
 
+  # Servidor 3: Base de Datos
+  InstanciaBaseDatos:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !Ref ImagenLinux
+      InstanceType: !Ref TipoInstancia
+      SecurityGroupIds:
+        - !Ref SecurityGroupId
+      Tags:
+        - Key: Name
+          Value: !Sub "vm-${Proyecto}-${Ambiente}-database"
+        - Key: Proyecto
+          Value: !Ref Proyecto
+        - Key: Ambiente
+          Value: !Ref Ambiente
+        - Key: Capa
+          Value: Database
+
 Outputs:
   IpPublicaFrontend:
-    Description: IP publica de la instancia Frontend
+    Description: IP publica del servidor Frontend
     Value: !GetAtt InstanciaFrontend.PublicIp
 
   IpPublicaBackend:
-    Description: IP publica de la instancia Backend
+    Description: IP publica del servidor Backend
     Value: !GetAtt InstanciaBackend.PublicIp
+
+  IpPublicaBaseDatos:
+    Description: IP publica del servidor Base de Datos
+    Value: !GetAtt InstanciaBaseDatos.PublicIp

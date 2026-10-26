@@ -25,9 +25,7 @@ Parameters:
     Description: Parametro SSM que resuelve la ultima AMI oficial de Amazon Linux 2023
 
 Resources:
-  # =======================================================
-  # STACK ANIDADO 1: RED
-  # =======================================================
+  # Stack anidado de red
   RedStack:
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -36,9 +34,7 @@ Resources:
         Proyecto: !Ref Proyecto
         Ambiente: !Ref Ambiente
 
-  # =======================================================
-  # STACK ANIDADO 2: SEGURIDAD
-  # =======================================================
+  # Stack anidado de seguridad
   SeguridadStack:
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -47,9 +43,7 @@ Resources:
         Proyecto: !Ref Proyecto
         Ambiente: !Ref Ambiente
 
-  # =======================================================
-  # STACK ANIDADO 3: COMPUTO / SERVIDORES
-  # =======================================================
+  # Stack anidado de servidores
   ServidoresStack:
     Type: AWS::CloudFormation::Stack
     DependsOn: SeguridadStack
@@ -64,9 +58,13 @@ Resources:
 
 Outputs:
   IpPublicaFrontend:
-    Description: IP publica del Frontend invocada desde ServidoresStack
+    Description: IP publica de la instancia Frontend
     Value: !GetAtt ServidoresStack.Outputs.IpPublicaFrontend
 
   IpPublicaBackend:
-    Description: IP publica del Backend invocada desde ServidoresStack
+    Description: IP publica de la instancia Backend
     Value: !GetAtt ServidoresStack.Outputs.IpPublicaBackend
+
+  IpPublicaBaseDatos:
+    Description: IP publica de la instancia Base de Datos
+    Value: !GetAtt ServidoresStack.Outputs.IpPublicaBaseDatos

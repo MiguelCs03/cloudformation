@@ -11,7 +11,7 @@ Parameters:
     Type: String
     Default: dev
     AllowedValues: [dev, qa, prod]
-    Description: Entorno de despliegue (dev, qa, prod)
+    Description: Entorno de despliegue
 
 Resources:
   GrupoSeguridad:
@@ -19,30 +19,30 @@ Resources:
     Properties:
       GroupDescription: !Sub "Grupo de Seguridad para ${Proyecto}-${Ambiente}"
       SecurityGroupIngress:
-        # Acceso administrativo SSH
+        # Regla de ingreso SSH
         - IpProtocol: tcp
           FromPort: 22
           ToPort: 22
           CidrIp: 0.0.0.0/0
           Description: "Acceso administrativo SSH"
-        # Acceso web HTTP Frontend
+        # Regla de ingreso HTTP
         - IpProtocol: tcp
           FromPort: 80
           ToPort: 80
           CidrIp: 0.0.0.0/0
-          Description: "Trafico web HTTP Frontend"
-        # Acceso web cifrado HTTPS Frontend
+          Description: "Trafico web HTTP"
+        # Regla de ingreso HTTPS
         - IpProtocol: tcp
           FromPort: 443
           ToPort: 443
           CidrIp: 0.0.0.0/0
-          Description: "Trafico web HTTPS Frontend"
-        # Puerto Backend API / Microservicios
+          Description: "Trafico web HTTPS"
+        # Regla de ingreso API Backend
         - IpProtocol: tcp
           FromPort: 3000
           ToPort: 3000
           CidrIp: 0.0.0.0/0
-          Description: "Puerto de aplicacion Backend API"
+          Description: "Puerto de comunicacion API"
       Tags:
         - Key: Name
           Value: !Sub "sg-${Proyecto}-${Ambiente}"
