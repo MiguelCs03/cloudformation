@@ -54,4 +54,4 @@ Resources:
 Outputs:
   SecurityGroupId:
     Description: ID del Grupo de Seguridad generado
-    Value: !Ref GrupoSeguridad
+    Value: !GetAtt GrupoSeguridad.GroupId
