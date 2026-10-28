@@ -41,7 +41,7 @@ Resources:
         - Key: Capa
           Value: Frontend
         - Key: Version
-          Value: v1.1
+          Value: v3.0
 
   # Servidor 2: Backend
   InstanciaBackend:
