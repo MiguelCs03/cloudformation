@@ -1,5 +1,6 @@
 template-file-path: main.yaml
 parameters:
-  ImagenLinux: "/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64"
+  Proyecto: globomatics
+  Ambiente: dev
 tags:
-  Prueba: "Demo"
+  Prueba: Demo
