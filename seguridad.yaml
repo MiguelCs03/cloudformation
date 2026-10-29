@@ -43,7 +43,7 @@ Resources:
           ToPort: 3000
           CidrIp: 0.0.0.0/0
           Description: "Puerto de comunicacion API"
-          # Regla adicional para probar una actualizacion del stack
+        # Regla adicional para probar una actualizacion del stack
         - IpProtocol: tcp
           FromPort: 8080
           ToPort: 8080
