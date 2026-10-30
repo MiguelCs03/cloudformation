@@ -37,16 +37,20 @@ Resources:
   # Stack anidado de seguridad
   SeguridadStack:
     Type: AWS::CloudFormation::Stack
+    DependsOn: RedStack
     Properties:
       TemplateURL: https://cf-templates-1c46xw9eudc8p-us-east-1.s3.us-east-1.amazonaws.com/seguridad.yaml
       Parameters:
         Proyecto: !Ref Proyecto
         Ambiente: !Ref Ambiente
+        VpcId: !GetAtt RedStack.Outputs.VpcId
 
   # Stack anidado de servidores
   ServidoresStack:
     Type: AWS::CloudFormation::Stack
-    DependsOn: SeguridadStack
+    DependsOn: 
+      - RedStack
+      - SeguridadStack
     Properties:
       TemplateURL: https://cf-templates-1c46xw9eudc8p-us-east-1.s3.us-east-1.amazonaws.com/servidores.yaml
       Parameters:
@@ -55,6 +59,7 @@ Resources:
         TipoInstancia: !Ref TipoInstancia
         ImagenLinux: !Ref ImagenLinux
         SecurityGroupId: !GetAtt SeguridadStack.Outputs.SecurityGroupId
+        SubnetId: !GetAtt RedStack.Outputs.SubnetId
 
 Outputs:
   IpPublicaFrontend:

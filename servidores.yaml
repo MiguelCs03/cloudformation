@@ -22,11 +22,16 @@ Parameters:
     Type: AWS::EC2::SecurityGroup::Id
     Description: ID del Grupo de Seguridad inyectado
 
+  SubnetId:
+    Type: AWS::EC2::Subnet::Id
+    Description: ID de la subred inyectada
+
 Resources:
   # Servidor 1: Frontend
   InstanciaFrontend:
     Type: AWS::EC2::Instance
     Properties:
+      SubnetId: !Ref SubnetId
       ImageId: !Ref ImagenLinux
       InstanceType: !Ref TipoInstancia
       SecurityGroupIds:
@@ -47,6 +52,7 @@ Resources:
   InstanciaBackend:
     Type: AWS::EC2::Instance
     Properties:
+      SubnetId: !Ref SubnetId
       ImageId: !Ref ImagenLinux
       InstanceType: !Ref TipoInstancia
       SecurityGroupIds:
@@ -65,6 +71,7 @@ Resources:
   InstanciaBaseDatos:
     Type: AWS::EC2::Instance
     Properties:
+      SubnetId: !Ref SubnetId
       ImageId: !Ref ImagenLinux
       InstanceType: !Ref TipoInstancia
       SecurityGroupIds:

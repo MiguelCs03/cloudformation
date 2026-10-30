@@ -13,10 +13,15 @@ Parameters:
     AllowedValues: [dev, qa, prod]
     Description: Entorno de despliegue
 
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+    Description: ID de la VPC inyectada
+
 Resources:
   GrupoSeguridad:
     Type: AWS::EC2::SecurityGroup
     Properties:
+      VpcId: !Ref VpcId
       GroupDescription: !Sub "Grupo de Seguridad para ${Proyecto}-${Ambiente}"
       SecurityGroupIngress:
         # Regla de ingreso SSH
