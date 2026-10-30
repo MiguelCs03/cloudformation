@@ -1,4 +1,4 @@
-template-file-path: main.yaml
+template-file-path: packaged.yaml
 parameters:
   Proyecto: globomatics
   Ambiente: dev

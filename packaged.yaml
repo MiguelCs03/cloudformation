@@ -1,0 +1,98 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Stack Padre - Orquestador de Plantillas Anidadas
+Parameters:
+  Proyecto:
+    Type: String
+    Default: globomatics
+    Description: Nombre del proyecto base
+  Ambiente:
+    Type: String
+    Default: dev
+    AllowedValues:
+    - dev
+    - qa
+    - prod
+    Description: Entorno de despliegue (dev, qa, prod)
+  TipoInstancia:
+    Type: String
+    Default: t3.micro
+    AllowedValues:
+    - t3.micro
+    - t3.small
+    Description: Tipo de instancia EC2 para computo
+  ImagenLinux:
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+    Default: 
+      /aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64
+    Description: Parametro SSM que resuelve la ultima AMI oficial de Amazon 
+      Linux 2023
+Resources:
+  RedStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: 
+        https://s3.us-east-1.amazonaws.com/cf-templates-1c46xw9eudc8p-us-east-1/8f498354cb524a0ab1b6b354aa0e04c1.template
+      Parameters:
+        Proyecto:
+          Ref: Proyecto
+        Ambiente:
+          Ref: Ambiente
+  SeguridadStack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: RedStack
+    Properties:
+      TemplateURL: 
+        https://s3.us-east-1.amazonaws.com/cf-templates-1c46xw9eudc8p-us-east-1/85d1097161a8eb71e7109a541a01770c.template
+      Parameters:
+        Proyecto:
+          Ref: Proyecto
+        Ambiente:
+          Ref: Ambiente
+        VpcId:
+          Fn::GetAtt:
+          - RedStack
+          - Outputs.VpcId
+  ServidoresStack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn:
+    - RedStack
+    - SeguridadStack
+    Properties:
+      TemplateURL: 
+        https://s3.us-east-1.amazonaws.com/cf-templates-1c46xw9eudc8p-us-east-1/7b4a97ebbb70ee28da9d88b6f10c6ae8.template
+      Parameters:
+        Proyecto:
+          Ref: Proyecto
+        Ambiente:
+          Ref: Ambiente
+        TipoInstancia:
+          Ref: TipoInstancia
+        ImagenLinux:
+          Ref: ImagenLinux
+        SecurityGroupId:
+          Fn::GetAtt:
+          - SeguridadStack
+          - Outputs.SecurityGroupId
+        SubnetId:
+          Fn::GetAtt:
+          - RedStack
+          - Outputs.SubnetId
+Outputs:
+  IpPublicaFrontend:
+    Description: IP publica de la instancia Frontend
+    Value:
+      Fn::GetAtt:
+      - ServidoresStack
+      - Outputs.IpPublicaFrontend
+  IpPublicaBackend:
+    Description: IP publica de la instancia Backend
+    Value:
+      Fn::GetAtt:
+      - ServidoresStack
+      - Outputs.IpPublicaBackend
+  IpPublicaBaseDatos:
+    Description: IP publica de la instancia Base de Datos
+    Value:
+      Fn::GetAtt:
+      - ServidoresStack
+      - Outputs.IpPublicaBaseDatos
