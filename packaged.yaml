@@ -42,7 +42,7 @@ Resources:
     DependsOn: RedStack
     Properties:
       TemplateURL: 
-        https://s3.us-east-1.amazonaws.com/cf-templates-1c46xw9eudc8p-us-east-1/7c81f5682bb7bfc96e5753f57824db41.template
+        https://s3.us-east-1.amazonaws.com/cf-templates-1c46xw9eudc8p-us-east-1/6bc4703a68fb117404fe36204e7b357f.template
       Parameters:
         Proyecto:
           Ref: Proyecto
